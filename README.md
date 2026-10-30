@@ -20,6 +20,8 @@ Skill 是"指令"，要等 Agent 判断该用才执行；插件挂在 DSH 运行
 dsh plugin --profile web add /path/to/dsh-model-autofill
 ```
 
+包内声明了 `dsh.bundle`（指向自带的 `cordis.patch.yml`），所以 `add` 会把它注册成 profile 层并自动激活——**不用手写条目**。要改默认选项时，再按 id 覆盖：
+
 ```yaml
 # profile 的 cordis.patch.yml
 - id: model-autofill
@@ -147,10 +149,35 @@ node test/integration.mjs    # 10 项：真实 defineTool/apply + 假 settings �
 4. **枚举来自运行时 schema**：字段名（`input` vs `inputModalities`）与取值都不写死。
 5. **fail-closed 可选**：需要"绝不猜测"时用 `strict` + `mapping`。
 
+## 验证状态
+
+- **逻辑测试**：30 项（schema 解析、目录三层合并、匹配与上限、规划器、`/v1` 探测、凭据解析）。
+- **集成测试**：10 项，用真实 `defineTool` / `apply` + 内存 settings 服务，覆盖写入、`modelOverrides`、strict、协议守卫、两条导入路径、三类触发。
+- **真机验证**（headless profile，`dsh plugin add` 安装）：插件作为 profile 层加载，并在一次真实启动里通过 `ctx.settings.mutate` 把元数据写进了真实 `cordis.patch.yml`：
+
+  ```yaml
+  - id: deepseek-v4-pro
+    name: DeepSeek V4 Pro
+    contextWindow: 512000
+    maxTokens: 325632
+    reasoningEfforts:
+      off: null
+      minimal: minimal
+      # … high / xhigh / max
+  - id: glm-5.3-flash
+    name: GLM-5.3-Flash
+    contextWindow: 1000000
+    input: [text, image]        # 原生视觉自动勾选
+    reasoningEfforts: { … }
+  ```
+
+  这次真机测试还抓出一个真 bug：`credentials` 原本是硬依赖，在没有凭据服务的 profile 里会让插件永远 `pending`；现在改为**可选**，只有"内联 key 存储"这一条路径需要它，缺失时给出明确报错。
+
 ## 已知限制
 
-- **没有客户端设置页**：全部通过工具驱动（同类里 `dsh-model-meta-autofill` 有设置页）。这是目前最明显的差距。
-- 本机未在真实 profile 里跑过完整导入（网络/环境限制），集成测试用的是假 settings 服务。
+- **没有客户端设置页**：交互全部通过工具驱动。选项本身会出现在 DSH 内置的设置表单里（Config 字段都标了 `.volatile()`），但没有"逐行预览 / 一键全部覆盖"的专用页面（同类里 `dsh-model-meta-autofill` 有）。这是目前最明显的差距。
+- 真机验证用的是 **headless** profile；`desktop` profile 由 Electron 独占，未在其中验证。
+- 本机 **npm 全局安装的 `dsh` CLI 无法创建 profile 模块兜底链接**（Windows 拒绝 Node 的 symlink 调用），CLI profile 需用应用自带的那份 `dsh`。这是环境问题，与本插件无关。
 
 ## License
 
