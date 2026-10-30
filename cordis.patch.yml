@@ -1,0 +1,12 @@
+# The dsh-model-autofill bundle patch.
+#
+# A bundle patch is applied as one insert over the profile root; later bundle
+# patches and the user's own cordis.patch.yml address these rows by id, with the
+# last write winning per row.
+#
+# One row: the plugin itself. All of its options are declared volatile, so DSH's
+# built-in settings form renders them without any client-side code.
+
+- insert:
+    - id: model-autofill
+      name: dsh-model-autofill

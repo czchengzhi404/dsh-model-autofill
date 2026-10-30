@@ -1,0 +1,5 @@
+# Local scratch directories for tests and dependency probing.
+.testdeps/
+.autofill-test-*/
+.autofill-it-*/
+node_modules/

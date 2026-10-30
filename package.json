@@ -1,0 +1,42 @@
+{
+  "name": "dsh-model-autofill",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin: import an OpenAI-compatible provider from the session (baseURL + API key, /v1 auto-normalized, key stored in the DSH credential store) and auto-fill model capabilities (contextWindow, maxTokens, input modalities, reasoning levels) from models.dev.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "data",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node test/logic.mjs",
+    "test:integration": "node test/integration.mjs",
+    "build:snapshot": "node scripts/build-snapshot.mjs"
+  },
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "models.dev",
+    "openai-compatible"
+  ],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.5",
+    "@deepseek-ai/schemastery": "~3.18.5",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+  }
+}
