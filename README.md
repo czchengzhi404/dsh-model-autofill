@@ -173,9 +173,28 @@ node test/integration.mjs    # 10 项：真实 defineTool/apply + 假 settings �
 
   这次真机测试还抓出一个真 bug：`credentials` 原本是硬依赖，在没有凭据服务的 profile 里会让插件永远 `pending`；现在改为**可选**，只有"内联 key 存储"这一条路径需要它，缺失时给出明确报错。
 
+## 设置页：用 DSH 原生的
+
+插件**不提供自己的界面**，而是把选项交给 DSH 内置的设置页渲染：`Config` 里所有用户选项都标了 `.volatile()`，`dsh-settings` 只为含 volatile 字段的条目生成表单。
+
+这一点也在真实 profile 里验证过——用一个探针插件打印 `ctx.settings.describe()`：
+
+```
+total namespaces: 13
+model-autofill: form leaves=25
+enabled:boolean | namespaces:array | autoFillOnStart:boolean | watchSettings:boolean |
+debounceMs:number | bootDelays:array | recheckMs:number | force:boolean | strict:boolean |
+mapping:dict | providers:array | excludeProviders:array |
+fill.limits:boolean | fill.input:boolean | fill.reasoning:boolean | fill.name:boolean |
+nameStyle:union | reasoningProtocols:array | forceReasoning:boolean | toggleLevels:array |
+margin:number | endpoint:string | cacheTtlMs:number | timeoutMs:number | credentialRef:string
+```
+
+也就是说：内置设置页会为这个插件渲染 **25 个可编辑控件**，并显示当前值；`cacheFile` / `snapshotPath` 这类部署路径按设计不暴露。设置改动写入 profile 的 `cordis.patch.yml`，且因为读的是 volatile 访问器，**改完下一轮就生效，不用重启**。
+
 ## 已知限制
 
-- **没有客户端设置页**：交互全部通过工具驱动。选项本身会出现在 DSH 内置的设置表单里（Config 字段都标了 `.volatile()`），但没有"逐行预览 / 一键全部覆盖"的专用页面（同类里 `dsh-model-meta-autofill` 有）。这是目前最明显的差距。
+- 没有"逐行预览 / 一键全部覆盖"的专用页面（同类里 `dsh-model-meta-autofill` 有）。原生表单能改选项，但逐模型的批量操作仍走工具（`force: true` 或一句"强制覆盖一遍"）。
 - 真机验证用的是 **headless** profile；`desktop` profile 由 Electron 独占，未在其中验证。
 - 本机 **npm 全局安装的 `dsh` CLI 无法创建 profile 模块兜底链接**（Windows 拒绝 Node 的 symlink 调用），CLI profile 需用应用自带的那份 `dsh`。这是环境问题，与本插件无关。
 
