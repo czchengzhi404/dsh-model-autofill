@@ -173,6 +173,17 @@ node test/integration.mjs    # 10 项：真实 defineTool/apply + 假 settings �
 
   这次真机测试还抓出一个真 bug：`credentials` 原本是硬依赖，在没有凭据服务的 profile 里会让插件永远 `pending`；现在改为**可选**，只有"内联 key 存储"这一条路径需要它，缺失时给出明确报错。
 
+- **触发链路真机验证**（"导入即自动补全"）：用探针调用 `ctx.settings.update("llm-pi-ai", …)`——设置页保存走的就是这条路——同时把启动补齐与定时复查都关掉（`bootDelays: []`、`recheckMs: 0`），新增的模型行仍然被补全。事件序列：
+
+  ```
+  simulating UI save: appending glm-5.3
+  event settings/document-updated ns=llm-pi-ai   ← 保存动作本身发出的事件
+  update resolved
+  event settings/document-updated ns=llm-pi-ai   ← 插件写入后再发一次（下一轮无操作，自动收敛）
+  ```
+
+  结果：新增的 `glm-5.3` 行拿到了 `contextWindow: 1000000`、`maxTokens: 110592`、`input: [text, image]` 与推理等级——**唯一可能的来源就是设置事件**。
+
 ## 设置页：用 DSH 原生的
 
 插件**不提供自己的界面**，而是把选项交给 DSH 内置的设置页渲染：`Config` 里所有用户选项都标了 `.volatile()`，`dsh-settings` 只为含 volatile 字段的条目生成表单。
