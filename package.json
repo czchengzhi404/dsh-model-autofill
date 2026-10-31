@@ -26,7 +26,7 @@
     "test:integration": "node test/integration.mjs",
     "build:snapshot": "node scripts/build-snapshot.mjs"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": [
     "dsh",
     "deepseek-harness",
