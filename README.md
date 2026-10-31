@@ -118,7 +118,8 @@ cd ~/.dsh/profiles/desktop && pnpm add /path/to/dsh-model-autofill
 | `namespaces` | `["llm-pi-ai","llm-deepseek"]` | 要审计的配置条目 |
 | `autoFillOnStart` / `bootDelays` | `true` / `[1000,3000,8000]` | 启动补齐与重试阶梯（空数组=不跑） |
 | `debounceMs` / `recheckMs` | `800` / `6h` | 去抖 / 定时复查（0=关闭） |
-| `fill.{limits,input,reasoning,name}` | 全 `true` | 分项开关 |
+| `fill.{limits,input,reasoning}` | 全 `true` | 分项开关：限额 / 输入模态 / 推理等级 |
+| `fill.name` | `false` | 显示名默认**不填**：目录名有时和路由主人自选的标签冲突，批量改名比补限额更扰人。需要时在设置页打开 |
 | `force` | `false` | 覆盖已有非空值 |
 | `strict` / `mapping` | `false` / `{}` | fail-closed 与显式映射 |
 | `providers` / `excludeProviders` | `[]` / `[]` | 只处理 / 完全不碰的渠道 |
@@ -134,10 +135,20 @@ cd ~/.dsh/profiles/desktop && pnpm add /path/to/dsh-model-autofill
 
 ```bash
 node test/logic.mjs          # 30 项：schema 解析、目录合并、匹配与上限、规划器、探测
-node test/integration.mjs    # 10 项：真实 defineTool/apply + 假 settings 服务，覆盖写入/触发/导入两条路径
+node test/integration.mjs    # 11 项：真实 apply + 假 settings 服务，覆盖写入/触发/导入两条路径
 ```
 
-`test/integration.mjs` 需要能解析 `@deepseek-ai/dsh-tools`、`schemastery`、`cordis` 这些 peer 依赖，所以要在装好依赖的环境里跑。
+`test/integration.mjs` 用 `@deepseek-ai/cordis` 提供插件上下文，所以要在装好 cordis 的环境里跑。插件本身只依赖 `@deepseek-ai/schemastery`（自带），不需要宿主的 `dsh-tools`。
+
+## 兼容性
+
+跨 DSH 版本可用的关键取舍：
+
+- **不自带 `dsh-tools`**：工具定义由插件内的 20 行构造器生成。`ctx.tools.register()` 只校验 `output.schema`，所以这足够——而 `dsh-tools` 会把 `dsh-llm`、`dsh-sandbox` 等整个核心拖进依赖图，并把你钉死在某一个 DSH 版本上。
+- **schemastery 自带**（`3.18.5`，装在包内 `node_modules`）：`.volatile()` 从较新版本才有，旧运行时（如 `0.1.5-rc.1` 带 `3.18.2`）没有。自带一份保证设置表单在任何宿主上都能渲染；万一宿主用别的实例校验，`~standard` 协议是跨实例通用的。
+- **`credentials` 是可选依赖**：没挂载凭据服务的 profile 里插件照常激活，只有"内联 key 存储"会报错。
+
+已在 `schemastery 3.18.2`（旧）与 `3.18.5`（当前桌面版）两个环境下验证加载。
 
 ## 与其他同类插件的定位
 
