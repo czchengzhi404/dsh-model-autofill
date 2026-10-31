@@ -196,7 +196,7 @@ await test("applies the planned edits and is idempotent on a second pass", async
     relay: { api: "openai-completions", baseURL: "https://relay.test/v1", apiKeyEnv: "RELAY_API_KEY", models: [{ id: "deepseek-v4-pro" }] }
   });
   const ctx = makeCtx(settings);
-  apply(ctx, Config(baseConfig(cacheFile)));
+  apply(ctx, Config({ ...baseConfig(cacheFile), fill: { name: true } }));
   await ctx.registered.get("model_capabilities_autofill").execute({});
   const model = settings.value.relay.models[0];
   assert.equal(model.contextWindow, 1000000);
@@ -206,6 +206,18 @@ await test("applies the planned edits and is idempotent on a second pass", async
   const writesAfterFirst = settings.writes.length;
   await ctx.registered.get("model_capabilities_autofill").execute({});
   assert.equal(settings.writes.length, writesAfterFirst, "a completed config needs no second write");
+});
+
+await test("leaves display names alone unless name filling is enabled", async () => {
+  const settings = makeSettings({
+    relay: { api: "openai-completions", baseURL: "https://relay.test/v1", apiKeyEnv: "RELAY_API_KEY", models: [{ id: "deepseek-v4-pro" }] }
+  });
+  const ctx = makeCtx(settings);
+  apply(ctx, Config(baseConfig(cacheFile)));
+  await ctx.registered.get("model_capabilities_autofill").execute({});
+  const model = settings.value.relay.models[0];
+  assert.equal(model.name, undefined, "the default leaves the label to the route owner");
+  assert.equal(model.contextWindow, 1000000, "limits are still filled");
 });
 
 await test("fills catalog-backed routes through modelOverrides", async () => {
