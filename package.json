@@ -1,43 +1,43 @@
-﻿{
-    "name":  "dsh-model-autofill",
-    "version":  "0.2.1",
-    "description":  "DeepSeek Harness plugin: import an OpenAI-compatible provider from the session (baseURL + API key, /v1 auto-normalized, key stored in the DSH credential store) and auto-fill model capabilities (contextWindow, maxTokens, input modalities, reasoning levels) from models.dev.",
-    "type":  "module",
-    "main":  "lib/index.js",
-    "exports":  {
-                    ".":  "./lib/index.js",
-                    "./package.json":  "./package.json"
-                },
-    "files":  [
-                  "lib",
-                  "data",
-                  "scripts",
-                  "cordis.patch.yml",
-                  "README.md",
-                  "LICENSE"
-              ],
-    "dsh":  {
-                "bundle":  {
-                               "patch":  "./cordis.patch.yml"
-                           }
-            },
-    "scripts":  {
-                    "test":  "node test/logic.mjs",
-                    "test:integration":  "node test/integration.mjs",
-                    "build:snapshot":  "node scripts/build-snapshot.mjs"
-                },
-    "license":  "MIT",
-    "keywords":  [
-                     "dsh",
-                     "deepseek-harness",
-                     "plugin",
-                     "models.dev",
-                     "openai-compatible"
-                 ],
-    "dependencies":  {
-                         "@deepseek-ai/schemastery":  "\u003e=3.18.2 \u003c4"
-                     },
-    "peerDependencies":  {
-                             "@deepseek-ai/cordis":  "\u003e=4.0.0"
-                         }
+{
+  "name": "dsh-model-autofill",
+  "version": "0.2.1",
+  "description": "DeepSeek Harness plugin: import an OpenAI-compatible provider from the session (baseURL + API key, /v1 auto-normalized, key stored in the DSH credential store) and auto-fill model capabilities (contextWindow, maxTokens, input modalities, reasoning levels) from models.dev.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "data",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node test/logic.mjs",
+    "test:integration": "node test/integration.mjs",
+    "build:snapshot": "node scripts/build-snapshot.mjs"
+  },
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "models.dev",
+    "openai-compatible"
+  ],
+  "dependencies": {
+    "@deepseek-ai/schemastery": ">=3.18.2 <4"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.0"
+  }
 }
